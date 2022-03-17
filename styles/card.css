@@ -1,0 +1,57 @@
+.card {
+    transition: 1s;
+    border: var(--color) .2rem solid;
+    /* padding: .5rem 2rem; */
+    margin: 1rem auto;
+    border-radius: 1rem 0rem;
+    background: linear-gradient(to right, transparent, transparent);
+    font-size: larger;
+    box-shadow: var(--box-shadow);
+    width: fit-content;
+    text-align: center;
+}
+.card--container {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    margin: .5rem auto;
+}
+
+.card--hover:hover {
+    border-radius: var(--border-radius);
+    background-color: var(--color);
+    color: var(--bg-color);
+}
+
+.card--playing {
+    transition: 1s;
+    margin: 1rem auto;
+    border-radius: 0rem 1rem;
+    background-color: var(--bg-color);
+    font-size: larger;
+    color: var(--color);
+    backdrop-filter: blur(.3rem);
+}
+
+.card-player-container {
+    position: fixed;
+    bottom: 0rem;
+    left: 0rem;
+    width: 100%;
+    max-width: 100vw;
+    z-index: 20;
+    display: flex;
+}
+.card--player {
+    /* left: 0rem; */
+    width: 100%;
+
+    /* padding: 2rem 2rem; */
+    /* max-width: 80rem; */
+    /* margin: auto auto; */
+    /* border: var(--color) .3rem solid; */
+    background-color: #3a2e3975;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(.3rem);
+    padding: 1rem;
+}

@@ -1,0 +1,22 @@
+.container__button--music--options {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.music--options {
+    position: absolute;
+    background-color: var(--bg-color);
+    right: 100%;
+    /* top: -10%; */
+    color: var(--color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: .3rem;
+}
+
+.music--option {
+    border-bottom: .1rem var(--color) solid;
+    border-top: .1rem var(--color) solid;
+    cursor: pointer;
+}
