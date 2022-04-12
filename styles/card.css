@@ -1,20 +1,24 @@
 .card {
     transition: 1s;
-    border: var(--color) .2rem solid;
+    border: var(--color) .1rem solid;
     /* padding: .5rem 2rem; */
     margin: 1rem auto;
-    border-radius: 1rem 0rem;
+    border-radius: var(--border-radius);
     background: linear-gradient(to right, transparent, transparent);
     font-size: larger;
     box-shadow: var(--box-shadow);
-    width: fit-content;
     text-align: center;
+    max-width: 80vh;
 }
 .card--container {
-    display: flex;
-    width: fit-content;
     align-items: center;
     margin: .5rem auto;
+}
+
+.card-music-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .card--hover:hover {
@@ -26,10 +30,10 @@
 .card--playing {
     transition: 1s;
     margin: 1rem auto;
-    border-radius: 0rem 1rem;
-    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    color: var(--bg-color);
+    background-color: var(--color);
     font-size: larger;
-    color: var(--color);
     backdrop-filter: blur(.3rem);
 }
 

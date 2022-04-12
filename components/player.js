@@ -15,7 +15,7 @@ import SvgVolume from 'svg/volume'
 
 import { GET_MUSIC } from 'services/getMusics'
 
-export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
+export default function MusicPlayer({ musicName, queue, allMusics, setMusicHandler, removeMusicFromQueueHandler }) {
     const [timeSlide, setTimeSlide] = useState()
     const [duration, setDuration] = useState()
     // const [volumeSlide, setVolumeSlide] = useState(music.music.volume)
@@ -23,16 +23,10 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
     const [isRamdom, setIsRamdom] = useState(false)
     const [isRepeat, setIsRepeat] = useState(true)
 
-    const [musicNameState, setMusicNameState] = useState(musicName)
-
-    // const [showVol, setShowVol] = useState(false)
-
-    // const [isHoverBtn, setisHoverBtn] = useState(false)
-
     const refMusic = useRef(null)
 
     const [isPaused, setIsPaused] = useState()
-    const [musicUrl, setMusicUrl] = useState()
+    const [musicUrl, setMusicUrl] = useState('')
 
     const calculateTime = (duration) => {
         const minutes = Math.floor(duration / 60)
@@ -45,21 +39,21 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
     }, [musicName])
 
     useEffect(() => {
-        if (!isPaused && timeSlide < duration) {
-            const intervalId = setInterval(() => {
-                setTimeSlide(prevCount => prevCount + 1);
-            }, 1000)
-            console.log({ timeSlide })
-            return () => clearInterval(intervalId)
-        } else if (isPaused || timeSlide > duration) {
-            // console.log({timeSlide})
-            setTimeSlide(refMusic.current.currentTime)
-        }
-            if (timeSlide === duration) {
+        if (refMusic.current !== null) {
+            if (!refMusic.current.paused) {
+                const intervalId = setInterval(() => {
+                    setTimeSlide(prevCount => prevCount + 1)
+                }, 1000)
+                return () => clearInterval(intervalId)
+            } else {
+                setTimeSlide(refMusic.current.currentTime)
+            }
+            if (refMusic.current.ended) {
                 nextMusic(musicName, isRepeat, isRamdom)
                 refMusic.current.currentTime = 0
                 setTimeSlide(refMusic.current.currentTime)
             }
+        }
     }, [isPaused, duration, timeSlide, musicName, isRepeat, isRamdom])
 
     // console.log({ music }, { musicPlaying })
@@ -68,7 +62,6 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
         if (isPaused) {
             await musicOnPlay.play()
             setIsPaused(musicOnPlay.paused)
-            // setTimeSlide(music.currentTime)
         } else {
             musicOnPlay.pause()
             setIsPaused(musicOnPlay.paused)
@@ -93,33 +86,48 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
     }
     const play = async (musicOnPlay) => {
         await musicOnPlay.play()
-        // setIsPaused(musicOnPlay.music.paused)
-        // setTimeSlide(music.music.currentTime)
     }
 
-    function initialState() {
-        setIsPaused(refMusic.current.isPaused)
-        setDuration(refMusic.current.duration)
-        setTimeSlide(refMusic.current.currentTime)
+    function initialState(musicRef) {
+        play(musicRef)
+        setIsPaused(musicRef.paused)
+        setDuration(musicRef.duration)
+        setTimeSlide(musicRef.currentTime)
+        console.log({ music: musicRef })
     }
 
     const prevMusic = (musicNamePlaying, Repeat, Ramdom) => {
         const indexMusicPreviusPlaying = allMusics.indexOf(musicNamePlaying)
-        Repeat && indexMusicPreviusPlaying === 0 ? 
+        Repeat && indexMusicPreviusPlaying === 0 ?
             (setMusicHandler(allMusics[allMusics.length - 1])) :
             (setMusicHandler(allMusics[indexMusicPreviusPlaying - 1]))
 
-       Ramdom && setMusicHandler(allMusics[Math.floor(Math.random() * (allMusics.length - 1))])
-        
+        Ramdom && setMusicHandler(allMusics[Math.floor(Math.random() * (allMusics.length - 1))])
+
     }
-    
+
     const nextMusic = (musicNamePlaying, Repeat, Ramdom) => {
+        if (queue.length > 0) {
+            setMusicHandler(queue[0])
+            removeMusicFromQueueHandler()
+            initialState(refMusic.current)
+            return
+        }
+
         const indexMusicPreviusPlaying = allMusics.indexOf(musicNamePlaying)
+
+
         Repeat && indexMusicPreviusPlaying === allMusics.length - 1 ?
             (setMusicHandler(allMusics[0])) :
             (setMusicHandler(allMusics[indexMusicPreviusPlaying + 1]))
-        
+
         Ramdom && setMusicHandler(allMusics[Math.floor(Math.random() * (allMusics.length - 1))])
+    }
+
+    // console.log(refMusic, musicUrl)
+
+    if (refMusic.current === null) {
+        return <div>loading</div>
     }
 
     return (
@@ -131,47 +139,71 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
             </Head>
             {refMusic ?
                 <div className='card-player-container'
-                    onLoadedData={initialState}
+                    onLoadedData={() => initialState(refMusic.current)}
                 >
                     {
                         musicUrl &&
                         (<div
                             className='card--player'
-                        >
+                            >
 
-                            <audio src={musicUrl} autoPlay ref={refMusic}/>
+                            <audio src={musicUrl} ref={refMusic}/>
                             <input type="range" className='slider-music' defaultValue={timeSlide} value={timeSlide} onChange={currentTimeHandler} min={0} max={duration} />
 
 
                             <div className='flex space-between align-center md-column'>
+                                <div className='flex space-between gap-1 align-center'>
+                                    <div className='md-none'>
+                                        <span>
+                                            {
+                                                calculateTime(timeSlide)
+                                            }
+                                        </span>
+                                        <span>
+                                           /
+                                        </span>
+                                        <span>
+                                            {
+                                                calculateTime(refMusic?.current?.duration)
+                                            }
+                                        </span>
+                                    </div>
 
+                                    <div className='flex gap-1'>
+                                        <button
+                                            className='button prev'
+                                            onClick={() => {
+                                                // pause(music)
+                                                prevMusic(musicName, isRepeat, isRamdom)
+                                            }}>
 
-                                <div className='flex gap-1'>
+                                            <Arrow />
+                                        </button>
+                                        <button
+                                            className='button'
+                                            onClick={() => playPause(refMusic.current)}
+                                        >
+                                            {
+                                                isPaused ? 'Play' : 'Pause'
+                                            }
+                                        </button>
+                                        <button
+                                            className='button'
+                                            onClick={() => {
+                                                // pause(music)
+                                                nextMusic(musicName, isRepeat, isRamdom)
+                                            }}>
+                                            <Arrow />
+                                        </button>
+                                    </div>
                                     <button
-                                        className='button prev'
-                                        onClick={() => {
-                                            // pause(music)
-                                            prevMusic(musicName, isRepeat, isRamdom)
-                                        }}>
-
-                                        <Arrow />
-                                    </button>
-                                    <button
-                                        className='button'
-                                        onClick={() => playPause(refMusic.current)}
-                                    >
-                                        {
-                                            isPaused ? 'Play' : 'Pause'
-                                        }
-                                    </button>
-                                    <button
-                                        className='button'
-                                        onClick={() => {
-                                            // pause(music)
-                                            nextMusic(musicName, isRepeat, isRamdom)
-                                        }}>
-                                        <Arrow />
-                                    </button>
+                                    // onMouseEnter={() => setisHoverBtn(true)}
+                                    // onClick={() => setisHoverBtn(!isHoverBtn)}
+                                    // className={isHoverBtn ? 'button active' : 'button'}
+                                    className='button md-show'
+                                >
+                                    <SvgOptios />
+                                </button>
                                 </div>
                                 <span
                                     className='name-music'
@@ -182,7 +214,7 @@ export default function MusicPlayer({ musicName, allMusics, setMusicHandler }) {
                                     // onMouseEnter={() => setisHoverBtn(true)}
                                     // onClick={() => setisHoverBtn(!isHoverBtn)}
                                     // className={isHoverBtn ? 'button active' : 'button'}
-                                    className='button'
+                                    className='button md-none'
                                 >
                                     <SvgOptios />
                                 </button>

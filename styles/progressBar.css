@@ -1,7 +1,4 @@
-:root {
-  --height: .8rem;
-  --border-radius: 4px 17px;
-}
+
 .slider-music {
   position: absolute;
   top: -2px;

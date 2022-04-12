@@ -17,6 +17,7 @@ export default function Home({ musicsName }) {
   const [musics, setMusics] = useState([])
   const [musicToPlay, setMusicToPlay] = useState()
   const [musicsGroupBy, setMusicsGroupBy] = useState([])
+  const [queue, setQueue] = useState([])
   useEffect(() => {
     const group = {}
     musicsName.forEach((name) => {
@@ -33,7 +34,18 @@ export default function Home({ musicsName }) {
     // music.music.play()
   }
 
-  console.log({ musicToPlay }, 'on index')
+  const setQueueHandler = (nameMusic) => {
+    setQueue([...queue, nameMusic])
+  }
+  
+  const removeMusicFromQueueHandler = () => {
+    //elimino el primer elemento de la cola
+    const musicToRemove = 0
+    const newQueue = queue.slice(1, queue.length)
+
+    setQueue(newQueue.slice(0, 1))
+  }
+
   return (
     <div>
       <Head>
@@ -50,7 +62,7 @@ export default function Home({ musicsName }) {
             <div
               key={key}
             >
-              <div className='sticky my-1'>
+              <div className='sticky my-2'>
 
                 <span className='card p-1'>{key}</span>
               </div>
@@ -61,16 +73,16 @@ export default function Home({ musicsName }) {
                     className='card--container'
                     key={name}>
                     <div
-                      className={name === musicToPlay ? 'card card--musics card--playing flex align-center' : 'card card--musics card--hover flex align-center'}
+                      className={name === musicToPlay ? 'card card--musics card--playing flex space-between align-center' : 'card card--musics card--hover flex space-between align-center'}
                       
                     >
                       <span
                         onClick={() => setMusicHandler(name)}
-                        className='p-1'
+                        className='p-1 card-music-name'
                       >
                         {name.replace('.mp3', '')}
                       </span>
-                        <ButtonOptions nameMusic={name}/>
+                        <ButtonOptions nameMusic={name} setQueueHandler={setQueueHandler}/>
                     </div>
                   </div>
                 ))
@@ -82,7 +94,12 @@ export default function Home({ musicsName }) {
 
         {
           musicToPlay &&
-          <MusicPlayer musicName={musicToPlay} allMusics={musicsName} setMusicHandler={setMusicHandler} />
+          <MusicPlayer 
+            musicName={musicToPlay}
+            allMusics={musicsName} 
+            setMusicHandler={setMusicHandler}
+            queue={queue}
+            removeMusicFromQueueHandler={removeMusicFromQueueHandler} />
         }
       </main>
     </div>

@@ -2,11 +2,12 @@ import { useState } from 'react'
 
 import SvgOptios from 'svg/options'
 
-export const ButtonOptions = ({ nameMusic }) => {
+export const ButtonOptions = ({ nameMusic, setQueueHandler }) => {
     const [showOptios, setShowOptios] = useState(false)
     function setNextMusic (nameMusic) {
         setShowOptios(false)
         console.log(nameMusic)
+        setQueueHandler(nameMusic)
     }
     return (
         <div
